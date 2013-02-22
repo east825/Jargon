@@ -18,7 +18,7 @@ public class Builder<T> {
     List<String> longNames = new ArrayList<>();
     String helpMessage;
     boolean isRequired = false;
-    int minArgs = 0, maxArgs = 1;
+    int minArgs = 0, maxArgs = 0;
     T defaultValue;
     Converter<? extends T> converter;
 
@@ -50,8 +50,8 @@ public class Builder<T> {
         return this;
     }
 
-    public Builder<T> nargs(int maxArgs) {
-        return nargs(1, maxArgs);
+    public Builder<T> nargs(int n) {
+        return nargs(n, n);
     }
 
     public Builder<T> nargs(String wildcard) {

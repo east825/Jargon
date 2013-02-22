@@ -16,6 +16,7 @@ public final class StringOptionBuilder extends Builder<String> {
 
     StringOptionBuilder(String... names) {
         super(names);
+        this.minArgs = this.maxArgs = 1;
         this.converter = STRING_CONVERTER;
     }
 

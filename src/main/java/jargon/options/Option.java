@@ -1,8 +1,10 @@
 package jargon.options;
 
 
+import jargon.OptionParser;
 import jargon.OptionParserException;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -25,6 +27,10 @@ public class Option<T> {
     private T defaultValue;
     private int count;
 
+    // Registered in addOption method
+    private OptionParser parser = null;
+
+
     // Parsed values
     private List<T> values = new LinkedList<>();
 
@@ -41,6 +47,10 @@ public class Option<T> {
         defaultValue = builder.defaultValue;
     }
 
+    public void setParser(OptionParser parser) {
+        this.parser = parser;
+    }
+
     public boolean matchName(String name) {
         return shortNames.contains(name) || longNames.contains(name);
     }
@@ -51,6 +61,13 @@ public class Option<T> {
 
     public int getCount() {
         return count;
+    }
+
+    private void checkLegalState() {
+        if (parser == null)
+            throw new IllegalStateException("Add option to parser using OptionParser.addOption() method");
+        if (!parser.isParsed())
+            throw new IllegalStateException("Call OptionParser.parse() method first");
     }
 
     public String getFormat() {
@@ -104,7 +121,7 @@ public class Option<T> {
     public int parse(List<String> args, int index) {
         count++;
         for (int i = 0; i < maxArgs; i++, index++) {
-            if (index < args.size()) {
+            if (index < args.size() && !parser.isOption(args.get(index))) {
                 String a = args.get(index);
                 try {
                     values.add(converter.convert(a));
@@ -121,19 +138,26 @@ public class Option<T> {
         return index;
     }
 
-    public T getSingleValue() {
+    public T getValue() {
+        checkLegalState();
+        if (maxArgs == 0)
+            return null;
         if (values.isEmpty())
-            values.add(defaultValue);
+            return defaultValue;
         return values.get(0);
     }
 
     public List<T> getAllValues() {
+        checkLegalState();
+        if (maxArgs == 0)
+            return null;
         if (values.isEmpty())
-            values.add(defaultValue);
+            return Arrays.asList(defaultValue);
         return values;
     }
 
     public boolean wasGiven() {
+        checkLegalState();
         return count != 0;
     }
 }

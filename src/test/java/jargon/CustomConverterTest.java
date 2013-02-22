@@ -37,12 +37,12 @@ public class CustomConverterTest {
         };
         // Type parameter of factory method can't be inferred, so it's explicit
         Option<Date> dateOption = Options.<Date>newOption("-d", "--date").converter(dateConverter).build();
-        OptionParser parser = OptionParser.newOptionParser("Sample program").build();
+        OptionParser parser = OptionParser.newInstance("Sample program").build();
         parser.addOption(dateOption);
         parser.parse("-d 1970-01-01".split(" "));
         // Note that month numbers start from zero
         Date expectedDate = new GregorianCalendar(1970, 0, 1).getTime();
-        assertThat(dateOption.getSingleValue(), equalTo(expectedDate));
+        assertThat(dateOption.getValue(), equalTo(expectedDate));
     }
 
     @Test
@@ -54,7 +54,7 @@ public class CustomConverterTest {
             }
         };
         Option<Ingredient> ingredients = Options.<Ingredient>newOption("-I").nargs("+").converter(enumConverter).build();
-        OptionParser parser = OptionParser.newOptionParser("Sample program").build();
+        OptionParser parser = OptionParser.newInstance("Sample program").build();
         parser.addOption(ingredients);
         parser.parse("-I Spam Spam sausages".split(" "));
         assertThat(ingredients.getAllValues(), equalTo(Arrays.asList(

@@ -16,6 +16,7 @@ public final class IntegerOptionBuilder extends Builder<Integer> {
 
     public IntegerOptionBuilder(String... names) {
         super(names);
+        this.minArgs = this.maxArgs = 1;
         this.converter = INTEGER_CONVERTER;
     }
 

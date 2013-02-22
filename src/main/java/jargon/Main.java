@@ -12,7 +12,7 @@ import java.util.List;
  */
 public class Main {
     public static void main(String[] args) {
-        OptionParser parser = OptionParser.newOptionParser("Test program").help(
+        OptionParser parser = OptionParser.newInstance("Test program").help(
                 "Just sample program. Assume it's some kind of archive program"
         ).build();
         Option<Boolean> compressFlag = Options.newFlagOption("--compress", "-c").
@@ -30,10 +30,10 @@ public class Main {
 
         List<String> pos = parser.parse(args);
         System.out.println(pos);
-        System.out.println("Compress: " + compressFlag.getSingleValue());
-        System.out.println("Decompress: " + decompressFlag.getSingleValue());
-        System.out.println("File name: " + fileNameOption.getSingleValue());
-        System.out.println("Compression level: " + compressionLevel.getSingleValue());
+        System.out.println("Compress: " + compressFlag.getValue());
+        System.out.println("Decompress: " + decompressFlag.getValue());
+        System.out.println("File name: " + fileNameOption.getValue());
+        System.out.println("Compression level: " + compressionLevel.getValue());
 
     }
 }

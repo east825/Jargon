@@ -2,7 +2,10 @@ package jargon;
 
 import jargon.options.Option;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * User: Mikhail Golubev
@@ -11,14 +14,14 @@ import java.util.*;
  */
 public class OptionParser {
     public static final String STOP_ARG_SYMBOL = "--";
-    public static final String LONG_OPTION_PREFIX = "--";
-    public static final String SHORT_OPTION_PREFIX = "-";
 
     private String helpMessage;
     private String programName;
     private boolean exitOnError;
     private boolean printHelp;
     private List<Option<?>> options = new LinkedList<>();
+    // set in parse method
+    private boolean parsed = false;
 
     public static class ParserBuilder {
         private String programName;
@@ -47,7 +50,7 @@ public class OptionParser {
         }
     }
 
-    static ParserBuilder newOptionParser(String programName) {
+    static ParserBuilder newInstance(String programName) {
         return new ParserBuilder(programName);
     }
 
@@ -60,6 +63,23 @@ public class OptionParser {
 
     public void addOption(Option<?> option) {
         options.add(option);
+        option.setParser(this);
+    }
+
+    public boolean isParsed() {
+        return parsed;
+    }
+
+    public boolean isOption(String arg) {
+        return arg.startsWith("-");
+    }
+
+    private boolean isShortOption(String arg) {
+        return arg.startsWith("-") && !arg.startsWith("--");
+    }
+
+    private boolean isLongOption(String arg) {
+        return arg.startsWith("--");
     }
 
     public void printHelpAndExit() {
@@ -80,6 +100,7 @@ public class OptionParser {
     }
 
     public List<String> parse(String... args) throws OptionParserException {
+        parsed = true;
         ArrayList<String> positionalArgs = new ArrayList<>();
         List<String> argsList = Arrays.asList(args);
         try {
@@ -90,8 +111,8 @@ public class OptionParser {
                     break;
                 }
                 boolean matched = false;
-                if (arg.startsWith(LONG_OPTION_PREFIX)) {
-                    if (printHelp && args.equals("--help")) {
+                if (isLongOption(arg)) {
+                    if (printHelp && arg.equals("--help")) {
                         printHelpAndExit();
                     }
                     for (Option<?> opt : options) {
@@ -101,10 +122,10 @@ public class OptionParser {
                             break;
                         }
                     }
-                } else if (arg.startsWith(SHORT_OPTION_PREFIX)) {
+                } else if (isShortOption(arg)) {
                     i++;
                     for (char c : arg.substring(1).toCharArray()) {
-                        if (c == 'h') {
+                        if (printHelp && c == 'h') {
                             printHelpAndExit();
                         }
                         for (Option<?> opt : options) {
