@@ -79,7 +79,7 @@ public class OptionParser {
         System.exit(0);
     }
 
-    public List<String> parse(String... args) throws ArgParserException {
+    public List<String> parse(String... args) throws OptionParserException {
         ArrayList<String> positionalArgs = new ArrayList<>();
         List<String> argsList = Arrays.asList(args);
         try {
@@ -121,14 +121,14 @@ public class OptionParser {
                     continue;
                 }
                 if (!matched) {
-                    throw new ArgParserException("Unknown option: " + arg + "");
+                    throw new OptionParserException("Unknown option: " + arg + "");
                 }
             }
             for (Option<?> opt: options) {
                 if (opt.isRequired() && !opt.wasGiven())
-                    throw new ArgParserException("Option " + opt.getName() + " is required, but was not specified");
+                    throw new OptionParserException("Option " + opt.getName() + " is required, but was not specified");
             }
-        } catch (ArgParserException e) {
+        } catch (OptionParserException e) {
             if (exitOnError) {
                 System.err.println(e.getMessage());
                 System.exit(1);

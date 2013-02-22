@@ -1,7 +1,7 @@
 package jargon.options;
 
 
-import jargon.ArgParserException;
+import jargon.OptionParserException;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -109,10 +109,10 @@ public class Option<T> {
                 try {
                     values.add(converter.convert(a));
                 } catch (IllegalArgumentException e) {
-                    throw new ArgParserException("Invalid argument " + a + " for option " + getName());
+                    throw new OptionParserException("Invalid argument " + a + " for option " + getName());
                 }
             } else if (i < minArgs) {
-                throw new ArgParserException(
+                throw new OptionParserException(
                         String.format("Not enough arguments for option %s (%d required, %d found)", getName(), minArgs, i));
             } else {
                 break;
