@@ -1,7 +1,5 @@
 package jargon;
 
-import jargon.options.Option;
-import jargon.options.Options;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -12,6 +10,7 @@ import java.util.List;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 /**
@@ -33,9 +32,9 @@ public class ParsingTest {
         parser = OptionParser.newInstance("Sample program").exitOnError(false).build();
         verboseMode = Options.newFlagOption("-v", "--verbose").build();
         parser.addOption(verboseMode);
-        fileName = Options.newStringOption("-f", "--file").build();
+        fileName = Options.newStringOption("-f", "--file").defaultValue("output.txt").build();
         parser.addOption(fileName);
-        size = Options.newIntergerOption("-s", "--size").build();
+        size = Options.newInteger("-s", "--size").build();
         parser.addOption(size);
     }
 
@@ -82,6 +81,15 @@ public class ParsingTest {
         exception.expect(OptionParserException.class);
         exception.expectMessage("Illegal value f for option --size");
         splitAndParse("-sf 100 somefile foo bar");
+    }
+
+    @Test
+    public void testOptionCountAndDefault() {
+        List<String> rest = splitAndParse("-vvvs 100 -vv foo bar");
+        assertThat(rest, equalTo(Arrays.asList("foo", "bar")));
+        assertThat(verboseMode.getCount(), equalTo(5));
+        assertThat(size.getValue(), equalTo(100));
+        assertThat(fileName.getValue(), equalTo("output.txt"));
     }
 
 }

@@ -1,8 +1,5 @@
 package jargon;
 
-import jargon.options.Converter;
-import jargon.options.Option;
-import jargon.options.Options;
 import org.junit.Test;
 
 import java.text.ParseException;
@@ -36,7 +33,7 @@ public class CustomConverterTest {
             }
         };
         // Type parameter of factory method can't be inferred, so it's explicit
-        Option<Date> dateOption = Options.<Date>newOption("-d", "--date").converter(dateConverter).build();
+        Option<Date> dateOption = Options.newOptionFor(dateConverter, "-d", "--date").build();
         OptionParser parser = OptionParser.newInstance("Sample program").build();
         parser.addOption(dateOption);
         parser.parse("-d 1970-01-01".split(" "));
@@ -53,7 +50,7 @@ public class CustomConverterTest {
                 return Ingredient.valueOf(value.toUpperCase());
             }
         };
-        Option<Ingredient> ingredients = Options.<Ingredient>newOption("-I").nargs("+").converter(enumConverter).build();
+        Option<Ingredient> ingredients = Options.newOptionFor(enumConverter, "-I").nargs("+").build();
         OptionParser parser = OptionParser.newInstance("Sample program").build();
         parser.addOption(ingredients);
         parser.parse("-I Spam Spam sausages".split(" "));

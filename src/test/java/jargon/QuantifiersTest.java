@@ -1,7 +1,5 @@
 package jargon;
 
-import jargon.options.Option;
-import jargon.options.Options;
 import org.junit.Before;
 import org.junit.Test;
 

@@ -1,4 +1,4 @@
-package jargon.options;
+package jargon;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -78,12 +78,7 @@ public class OptionBuilder<T> {
         return this;
     }
 
-    protected Converter<? extends T> getConverter() {
-        return converter;
-    }
-
     public Option<T> build() {
-        converter = getConverter();
         if (converter == null)
             throw new IllegalStateException("Converter is required");
         return new Option<>(this);

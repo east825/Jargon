@@ -1,8 +1,5 @@
-package jargon.options;
+package jargon;
 
-
-import jargon.OptionParser;
-import jargon.OptionParserException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,12 +28,9 @@ public class Option<T> {
     // Registered in addOption method
     private OptionParser parser = null;
 
-
     // Parsed values
     private List<T> values = new LinkedList<>();
 
-
-    // package private constructor
     public Option(OptionBuilder<T> builder) {
         shortNames = builder.shortNames;
         longNames = builder.longNames;
@@ -76,14 +70,6 @@ public class Option<T> {
         return count;
     }
 
-
-    private boolean isShortOption(String arg) {
-        return arg.startsWith("-") && !arg.startsWith("--");
-    }
-
-    private boolean isLongOption(String arg) {
-        return arg.startsWith("--");
-    }
     private void checkLegalState() {
         if (parser == null)
             throw new IllegalStateException("Add option to parser using OptionParser.addOption() method");
@@ -104,8 +90,7 @@ public class Option<T> {
         if (maxArgs - minArgs > 0) {
             b.append("[").append(maxArgs - minArgs > 1 ? " ... " : "");
             b.append("arg").append(maxArgs).append("]");
-        }
-        else if (maxArgs - minArgs > 1)
+        } else if (maxArgs - minArgs > 1)
             b.append("[ ... arg").append(maxArgs).append("]");
 
         if (!isRequired) {
@@ -118,11 +103,11 @@ public class Option<T> {
         StringBuilder b = new StringBuilder(getName());
         if (shortNames.size() + longNames.size() > 1) {
             b.append(" (also ");
-            for (String name: shortNames) {
+            for (String name : shortNames) {
                 if (!name.equals(getName()))
                     b.append(name).append(" ");
             }
-            for (String name: longNames) {
+            for (String name : longNames) {
                 if (!name.equals(getName()))
                     b.append(" ").append(name);
             }
@@ -138,38 +123,29 @@ public class Option<T> {
         count++;
         if (maxArgs == 0)
             return index;
+        String arg = args.get(index);
         if (maxArgs == 1) {
-            String tail = "";
-            String currentOption = args.get(index);
-            if (isLongOption(currentOption) && currentOption.contains("=")) {
-                tail = currentOption.split("=", 2)[1];
-            } else if (isShortOption(currentOption)) {
-                for (String name: shortNames) {
-                    int from = currentOption.indexOf(name.charAt(1));
+            String remainder = "";
+            if (parser.isLongOption(arg) && arg.contains("=")) {
+                remainder = arg.split("=", 2)[1];
+            } else if (parser.isShortOption(arg)) {
+                for (String name : shortNames) {
+                    int from = arg.indexOf(name.charAt(1));
                     if (from != -1) {
-                        tail = currentOption.substring(from + 1);
+                        remainder = arg.substring(from + 1);
                         break;
                     }
                 }
             }
-            if (!tail.isEmpty()) {
-                try {
-                    values.add(converter.convert(tail));
-                } catch (Exception e) {
-                    throw new OptionParserException("Illegal value " + tail + " for option " + getName(), e);
-                }
+            if (!remainder.isEmpty()) {
+                proceedValue(remainder);
                 return index + 1;
             }
         }
         index++;
         for (int i = 0; i < maxArgs; i++, index++) {
             if (index < args.size() && !parser.isOption(args.get(index))) {
-                String a = args.get(index);
-                try {
-                    values.add(converter.convert(a));
-                } catch (Exception e) {
-                    throw new OptionParserException("Invalid value " + a + " for option " + getName(), e);
-                }
+                proceedValue(args.get(index));
             } else if (i < minArgs) {
                 throw new OptionParserException(
                         String.format("Not enough arguments for option %s (%d required, %d found)", getName(), minArgs, i));
@@ -178,6 +154,14 @@ public class Option<T> {
             }
         }
         return index;
+    }
+
+    private void proceedValue(String tail) {
+        try {
+            values.add(converter.convert(tail));
+        } catch (Exception e) {
+            throw new OptionParserException("Illegal value " + tail + " for option " + getName(), e);
+        }
     }
 
     public T getValue() {

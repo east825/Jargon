@@ -1,7 +1,5 @@
 package jargon;
 
-import jargon.options.Option;
-import jargon.options.Options;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;

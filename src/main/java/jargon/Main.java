@@ -1,8 +1,5 @@
 package jargon;
 
-import jargon.options.Option;
-import jargon.options.Options;
-
 import java.util.List;
 
 /**
@@ -24,7 +21,7 @@ public class Main {
         Option<String> fileNameOption = Options.newStringOption("--file-name", "-f").
                 help("target file").nargs(1).required(true).build();
         parser.addOption(fileNameOption);
-        Option<Integer> compressionLevel = Options.newIntergerOption("-l", "--level").
+        Option<Integer> compressionLevel = Options.newInteger("-l", "--level").
                 help("Compression level").defaultValue(0).build();
         parser.addOption(compressionLevel);
 

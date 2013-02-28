@@ -1,4 +1,4 @@
-package jargon.options;
+package jargon;
 
 /**
  * User: Mikhail Golubev

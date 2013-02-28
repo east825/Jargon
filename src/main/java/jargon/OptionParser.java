@@ -1,9 +1,5 @@
 package jargon;
 
-import jargon.options.OptionBuilder;
-import jargon.options.Option;
-import jargon.options.Options;
-
 import java.util.*;
 
 /**
@@ -97,11 +93,11 @@ public class OptionParser {
         return arg.startsWith("-");
     }
 
-    private boolean isShortOption(String arg) {
+    public boolean isShortOption(String arg) {
         return arg.startsWith("-") && !arg.startsWith("--");
     }
 
-    private boolean isLongOption(String arg) {
+    public boolean isLongOption(String arg) {
         return arg.startsWith("--");
     }
 
