@@ -31,4 +31,11 @@ public class ErrorTest {
         parser.addOption(verbose);
         verbose.getValue();
     }
+
+    @Test
+    public void conflictingOptionsNames() {
+        exception.expect(IllegalArgumentException.class);
+        parser.addOption(Options.newStringOption("-l", "--list").build());
+        parser.addOption(Options.newStringOption("-l", "--last").build());
+    }
 }

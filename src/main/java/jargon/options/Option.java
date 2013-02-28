@@ -4,6 +4,7 @@ package jargon.options;
 import jargon.OptionParser;
 import jargon.OptionParserException;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -36,7 +37,7 @@ public class Option<T> {
 
 
     // package private constructor
-    Option(Builder<T> builder) {
+    public Option(OptionBuilder<T> builder) {
         shortNames = builder.shortNames;
         longNames = builder.longNames;
         minArgs = builder.minArgs;
@@ -51,8 +52,20 @@ public class Option<T> {
         this.parser = parser;
     }
 
-    public boolean matchName(String name) {
-        return shortNames.contains(name) || longNames.contains(name);
+    public String getName() {
+        if (!longNames.isEmpty())
+            return longNames.get(0);
+        return shortNames.get(0);
+    }
+
+    public List<String> getNames() {
+        ArrayList<String> allNames = new ArrayList<>(longNames);
+        allNames.addAll(shortNames);
+        return allNames;
+    }
+
+    public T getDefaultValue() {
+        return defaultValue;
     }
 
     public boolean isRequired() {
@@ -63,6 +76,14 @@ public class Option<T> {
         return count;
     }
 
+
+    private boolean isShortOption(String arg) {
+        return arg.startsWith("-") && !arg.startsWith("--");
+    }
+
+    private boolean isLongOption(String arg) {
+        return arg.startsWith("--");
+    }
     private void checkLegalState() {
         if (parser == null)
             throw new IllegalStateException("Add option to parser using OptionParser.addOption() method");
@@ -112,21 +133,42 @@ public class Option<T> {
         return b.toString();
     }
 
-    public String getName() {
-        if (!longNames.isEmpty())
-            return longNames.get(0);
-        return shortNames.get(0);
-    }
 
     public int parse(List<String> args, int index) {
         count++;
+        if (maxArgs == 0)
+            return index;
+        if (maxArgs == 1) {
+            String tail = "";
+            String currentOption = args.get(index);
+            if (isLongOption(currentOption) && currentOption.contains("=")) {
+                tail = currentOption.split("=", 2)[1];
+            } else if (isShortOption(currentOption)) {
+                for (String name: shortNames) {
+                    int from = currentOption.indexOf(name.charAt(1));
+                    if (from != -1) {
+                        tail = currentOption.substring(from + 1);
+                        break;
+                    }
+                }
+            }
+            if (!tail.isEmpty()) {
+                try {
+                    values.add(converter.convert(tail));
+                } catch (Exception e) {
+                    throw new OptionParserException("Illegal value " + tail + " for option " + getName(), e);
+                }
+                return index + 1;
+            }
+        }
+        index++;
         for (int i = 0; i < maxArgs; i++, index++) {
             if (index < args.size() && !parser.isOption(args.get(index))) {
                 String a = args.get(index);
                 try {
                     values.add(converter.convert(a));
-                } catch (IllegalArgumentException e) {
-                    throw new OptionParserException("Invalid argument " + a + " for option " + getName());
+                } catch (Exception e) {
+                    throw new OptionParserException("Invalid value " + a + " for option " + getName(), e);
                 }
             } else if (i < minArgs) {
                 throw new OptionParserException(
@@ -140,18 +182,15 @@ public class Option<T> {
 
     public T getValue() {
         checkLegalState();
-        if (maxArgs == 0)
-            return null;
-        if (values.isEmpty())
+        if (!wasGiven())
             return defaultValue;
-        return values.get(0);
+        // const returned in argparse if no arguments were supplied
+        return values.isEmpty() ? null : values.get(0);
     }
 
     public List<T> getAllValues() {
         checkLegalState();
-        if (maxArgs == 0)
-            return null;
-        if (values.isEmpty())
+        if (!wasGiven())
             return Arrays.asList(defaultValue);
         return values;
     }
@@ -159,5 +198,10 @@ public class Option<T> {
     public boolean wasGiven() {
         checkLegalState();
         return count != 0;
+    }
+
+    @Override
+    public String toString() {
+        return "<Option: " + getNames() + " >";
     }
 }

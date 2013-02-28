@@ -6,20 +6,20 @@ package jargon.options;
  * Time: 0:14
  */
 public class Options {
-    static public Builder<String> newStringOption(String... names) {
+    static public OptionBuilder<String> newStringOption(String... names) {
         return new StringOptionBuilder(names);
     }
 
-    static public Builder<Integer> newIntergerOption(String... names) {
+    static public OptionBuilder<Integer> newIntergerOption(String... names) {
         return new IntegerOptionBuilder(names);
     }
 
-    static public Builder<Boolean> newFlagOption(String... names) {
+    static public OptionBuilder<Boolean> newFlagOption(String... names) {
         return new FlagOptionBuilder(names);
     }
 
-    static public <T> Builder<T> newOption(String... names) {
-        return new Builder<>(names);
+    static public <T> OptionBuilder<T> newOption(String... names) {
+        return new OptionBuilder<>(names);
     }
 
 }

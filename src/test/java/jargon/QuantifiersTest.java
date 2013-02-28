@@ -41,7 +41,7 @@ public class QuantifiersTest {
         addOptionAndParse("-w foo bar baz -v quux");
         assertThat(rest, equalTo(Arrays.asList("foo", "bar", "baz", "quux")));
         assertThat(option.getValue(), is(nullValue()));
-        assertThat(option.getAllValues(), is(nullValue()));
+        assertThat(option.getAllValues().isEmpty(), is(true));
     }
 
     @Test

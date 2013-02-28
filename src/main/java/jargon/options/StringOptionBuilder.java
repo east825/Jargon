@@ -5,7 +5,7 @@ package jargon.options;
  * Date: 19.02.13
  * Time: 23:31
  */
-public final class StringOptionBuilder extends Builder<String> {
+public final class StringOptionBuilder extends OptionBuilder<String> {
 
     private static final Converter<String> STRING_CONVERTER = new Converter<String>() {
         @Override
@@ -16,7 +16,6 @@ public final class StringOptionBuilder extends Builder<String> {
 
     StringOptionBuilder(String... names) {
         super(names);
-        this.minArgs = this.maxArgs = 1;
         this.converter = STRING_CONVERTER;
     }
 
@@ -26,7 +25,7 @@ public final class StringOptionBuilder extends Builder<String> {
     }
 
     @Override
-    public Builder<String> converter(Converter<String> c) {
+    public OptionBuilder<String> converter(Converter<String> c) {
         throw new UnsupportedOperationException("StringOptionBuilder has builtin converter");
     }
 }

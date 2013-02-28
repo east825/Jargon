@@ -10,7 +10,7 @@ import java.util.List;
  * Time: 0:11
  */
 
-public class Builder<T> {
+public class OptionBuilder<T> {
 
     // Next fields are package private for accessing from Option class
     List<String> names;
@@ -18,11 +18,11 @@ public class Builder<T> {
     List<String> longNames = new ArrayList<>();
     String helpMessage;
     boolean isRequired = false;
-    int minArgs = 0, maxArgs = 0;
+    int minArgs = 1, maxArgs = 1;
     T defaultValue;
     Converter<? extends T> converter;
 
-    Builder(String... names) {
+    OptionBuilder(String... names) {
         if (names.length == 0)
             throw new IllegalArgumentException("No option names given");
 
@@ -37,12 +37,12 @@ public class Builder<T> {
         this.names = Arrays.asList(names);
     }
 
-    public Builder<T> help(String helpMessage) {
+    public OptionBuilder<T> help(String helpMessage) {
         this.helpMessage = helpMessage;
         return this;
     }
 
-    public Builder<T> nargs(int minArgs, int maxArgs) {
+    public OptionBuilder<T> nargs(int minArgs, int maxArgs) {
         if (minArgs < 0 || maxArgs < 0 || minArgs > maxArgs)
             throw new IllegalArgumentException("Invalid options number quantifier: {" + minArgs + " ," + maxArgs + "}");
         this.minArgs = minArgs;
@@ -50,11 +50,11 @@ public class Builder<T> {
         return this;
     }
 
-    public Builder<T> nargs(int n) {
+    public OptionBuilder<T> nargs(int n) {
         return nargs(n, n);
     }
 
-    public Builder<T> nargs(String wildcard) {
+    public OptionBuilder<T> nargs(String wildcard) {
         if (wildcard.equals("+")) {
             nargs(1, Integer.MAX_VALUE);
         } else if (wildcard.equals("?")) {
@@ -63,17 +63,17 @@ public class Builder<T> {
         return this;
     }
 
-    public Builder<T> defaultValue(T value) {
+    public OptionBuilder<T> defaultValue(T value) {
         defaultValue = value;
         return this;
     }
 
-    public Builder<T> converter(Converter<T> c) {
+    public OptionBuilder<T> converter(Converter<T> c) {
         converter = c;
         return this;
     }
 
-    public Builder<T> required(boolean isRequired) {
+    public OptionBuilder<T> required(boolean isRequired) {
         this.isRequired = isRequired;
         return this;
     }

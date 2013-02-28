@@ -1,11 +1,10 @@
 package jargon;
 
+import jargon.options.OptionBuilder;
 import jargon.options.Option;
+import jargon.options.Options;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * User: Mikhail Golubev
@@ -18,8 +17,8 @@ public class OptionParser {
     private String helpMessage;
     private String programName;
     private boolean exitOnError;
-    private boolean printHelp;
     private List<Option<?>> options = new LinkedList<>();
+    private Map<String, Option<?>> optionRegistry = new HashMap<>();
     // set in parse method
     private boolean parsed = false;
 
@@ -58,12 +57,36 @@ public class OptionParser {
         programName = builder.programName;
         helpMessage = builder.helpMessage;
         exitOnError = builder.exitOnError;
-        printHelp = builder.printHelp;
+        if (builder.printHelp) {
+            HelpOption helpOption = new HelpOption(Options.newFlagOption("-h", "--help").help(
+                    "Print this help message and exit"
+            ));
+            addOption(helpOption);
+        }
     }
 
     public void addOption(Option<?> option) {
+        for (String name: option.getNames()) {
+            if (optionRegistry.containsKey(name)) {
+                throw new IllegalArgumentException("Conflicting options: " + option + " and " + optionRegistry.get(name));
+            }
+            optionRegistry.put(name, option);
+        }
         options.add(option);
         option.setParser(this);
+    }
+
+    private Option<?> findOption(String arg) {
+        Option<?> option;
+        if (isLongOption(arg))
+            option = optionRegistry.get(arg.split("=")[0]);
+        else if (isShortOption(arg))
+            option = optionRegistry.get("-" + arg.charAt(1));
+        else
+            throw new IllegalArgumentException("Malformed option " + arg);
+        if (option == null)
+            throw new OptionParserException("Unknown option " + arg);
+        return option;
     }
 
     public boolean isParsed() {
@@ -82,7 +105,7 @@ public class OptionParser {
         return arg.startsWith("--");
     }
 
-    public void printHelpAndExit() {
+    public String buildHelpMessage() {
         StringBuilder b = new StringBuilder(programName);
         for (Option<?> o: options) {
             b.append(" ");
@@ -95,8 +118,7 @@ public class OptionParser {
         }
         if (helpMessage != null && !helpMessage.isEmpty())
             b.append("\n").append(helpMessage);
-        System.out.println(b.toString());
-        System.exit(0);
+        return b.toString();
     }
 
     public List<String> parse(String... args) throws OptionParserException {
@@ -110,39 +132,21 @@ public class OptionParser {
                     positionalArgs.addAll(argsList.subList(i + 1, argsList.size()));
                     break;
                 }
-                boolean matched = false;
                 if (isLongOption(arg)) {
-                    if (printHelp && arg.equals("--help")) {
-                        printHelpAndExit();
-                    }
-                    for (Option<?> opt : options) {
-                        if (opt.matchName(arg)) {
-                            matched = true;
-                            i = opt.parse(argsList, i + 1);
-                            break;
-                        }
-                    }
+                    i = findOption(arg).parse(argsList, i);
                 } else if (isShortOption(arg)) {
-                    i++;
-                    for (char c : arg.substring(1).toCharArray()) {
-                        if (printHelp && c == 'h') {
-                            printHelpAndExit();
-                        }
-                        for (Option<?> opt : options) {
-                            if (opt.matchName("-" + c)) {
-                                matched = true;
-                                i = opt.parse(argsList, i);
-                                break;
-                            }
-                        }
+                    int nextArgPos = i;
+                    for (char c: arg.substring(1).toCharArray()) {
+                        nextArgPos = findOption("-" + c).parse(argsList, i);
+                        if (nextArgPos != i)
+                            break;
                     }
+                    // last option shifted index of args list
+                    // or we quit because character sequence exhausted
+                    i = nextArgPos == i? i + 1: nextArgPos;
                 } else {
                     positionalArgs.add(arg);
                     i++;
-                    continue;
-                }
-                if (!matched) {
-                    throw new OptionParserException("Unknown option: " + arg + "");
                 }
             }
             for (Option<?> opt: options) {
@@ -157,5 +161,19 @@ public class OptionParser {
             throw e;
         }
         return positionalArgs;
+    }
+
+    private class HelpOption extends Option<Boolean> {
+        private HelpOption(OptionBuilder<Boolean> builder) {
+            super(builder);
+        }
+
+        @Override
+        public int parse(List<String> args, int index) {
+            String helpMessage = OptionParser.this.buildHelpMessage();
+            System.err.println(helpMessage);
+            System.exit(2);
+            return -1;
+        }
     }
 }
