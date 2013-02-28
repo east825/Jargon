@@ -13,10 +13,11 @@ public class OptionParser {
     private String helpMessage;
     private String programName;
     private boolean exitOnError;
-    private List<Option<?>> options = new LinkedList<>();
-    private Map<String, Option<?>> optionRegistry = new HashMap<>();
+    private List<BaseOption<?>> options = new LinkedList<>();
+    private Map<String, BaseOption<?>> optionRegistry = new HashMap<>();
     // set in parse method
     private boolean parsed = false;
+    private Flag helpOption;
 
     public static class ParserBuilder {
         private String programName;
@@ -54,14 +55,12 @@ public class OptionParser {
         helpMessage = builder.helpMessage;
         exitOnError = builder.exitOnError;
         if (builder.printHelp) {
-            HelpOption helpOption = new HelpOption(Options.newFlagOption("-h", "--help").help(
-                    "Print this help message and exit"
-            ));
+            helpOption = Options.newFlagOption("-h", "--help").help("Print this help message and exit").build();
             addOption(helpOption);
         }
     }
 
-    public void addOption(Option<?> option) {
+    public void addOption(BaseOption<?> option) {
         for (String name: option.getNames()) {
             if (optionRegistry.containsKey(name)) {
                 throw new IllegalArgumentException("Conflicting options: " + option + " and " + optionRegistry.get(name));
@@ -72,8 +71,8 @@ public class OptionParser {
         option.setParser(this);
     }
 
-    private Option<?> findOption(String arg) {
-        Option<?> option;
+    private BaseOption<?> findOption(String arg) {
+        BaseOption<?> option;
         if (isLongOption(arg))
             option = optionRegistry.get(arg.split("=")[0]);
         else if (isShortOption(arg))
@@ -101,14 +100,14 @@ public class OptionParser {
         return arg.startsWith("--");
     }
 
-    public String buildHelpMessage() {
+    private String buildHelpMessage() {
         StringBuilder b = new StringBuilder(programName);
-        for (Option<?> o: options) {
+        for (BaseOption<?> o: options) {
             b.append(" ");
             b.append(o.getFormat());
         }
         b.append("\n\n");
-        for (Option<?> o: options) {
+        for (BaseOption<?> o: options) {
             b.append(o.buildHelpMessage());
             b.append("\n");
         }
@@ -117,10 +116,16 @@ public class OptionParser {
         return b.toString();
     }
 
-    public List<String> parse(String... args) throws OptionParserException {
+    private void printHelpAndExit() {
+        System.err.println(buildHelpMessage());
+        System.exit(2);
+    }
+
+    public List<String> parse(String... args) {
         parsed = true;
         ArrayList<String> positionalArgs = new ArrayList<>();
         List<String> argsList = Arrays.asList(args);
+        BaseOption<?> option;
         try {
             for (int i = 0; i < argsList.size(); /* empty */) {
                 String arg = argsList.get(i);
@@ -129,11 +134,17 @@ public class OptionParser {
                     break;
                 }
                 if (isLongOption(arg)) {
-                    i = findOption(arg).parse(argsList, i);
+                    option = findOption(arg);
+                    if (option == helpOption)
+                        printHelpAndExit();
+                    i = option.parse(argsList, i);
                 } else if (isShortOption(arg)) {
                     int nextArgPos = i;
                     for (char c: arg.substring(1).toCharArray()) {
-                        nextArgPos = findOption("-" + c).parse(argsList, i);
+                        option = findOption("-" + c);
+                        if (option == helpOption)
+                            printHelpAndExit();
+                        nextArgPos = option.parse(argsList, i);
                         if (nextArgPos != i)
                             break;
                     }
@@ -145,8 +156,8 @@ public class OptionParser {
                     i++;
                 }
             }
-            for (Option<?> opt: options) {
-                if (opt.isRequired() && !opt.wasGiven())
+            for (BaseOption<?> opt: options) {
+                if (opt.isRequired() && opt.getCount() == 0)
                     throw new OptionParserException("Option " + opt.getName() + " is required, but was not specified");
             }
         } catch (OptionParserException e) {
@@ -157,19 +168,5 @@ public class OptionParser {
             throw e;
         }
         return positionalArgs;
-    }
-
-    private class HelpOption extends Option<Boolean> {
-        private HelpOption(OptionBuilder<Boolean> builder) {
-            super(builder);
-        }
-
-        @Override
-        public int parse(List<String> args, int index) {
-            String helpMessage = OptionParser.this.buildHelpMessage();
-            System.err.println(helpMessage);
-            System.exit(2);
-            return -1;
-        }
     }
 }

@@ -24,15 +24,15 @@ public class Options {
         return new OptionBuilder<String>(names).converter(STRING_CONVERTER);
     }
 
-    static public OptionBuilder<Integer> newInteger(String... names) {
+    static public OptionBuilder<Integer> newIntegerOption(String... names) {
         return new OptionBuilder<Integer>(names).converter(INTEGER_CONVERTER);
     }
 
-    static public OptionBuilder<Boolean> newFlagOption(String... names) {
+    static public FlagOptionBuilder newFlagOption(String... names) {
         return new FlagOptionBuilder(names);
     }
 
-    static public <T> OptionBuilder<T> newOptionFor(Converter<T> c, String... names) {
+    static public <T> OptionBuilder<T> newOption(Converter<T> c, String... names) {
         return new OptionBuilder<T>(names).converter(c);
     }
 

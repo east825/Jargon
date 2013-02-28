@@ -13,7 +13,7 @@ public class ErrorTest {
     @Rule
     public ExpectedException exception = ExpectedException.none();
     private OptionParser parser = OptionParser.newInstance("Sample program").build();
-    private Option<Boolean> verbose = Options.newFlagOption("-v").build();
+    private BaseOption<Boolean> verbose = Options.newFlagOption("-v").build();
 
     @Test
     public void optionNotAddedToParser() {

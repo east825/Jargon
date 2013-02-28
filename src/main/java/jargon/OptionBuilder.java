@@ -10,7 +10,7 @@ import java.util.List;
  * Time: 0:11
  */
 
-public class OptionBuilder<T> {
+public final class OptionBuilder<T> {
 
     // Next fields are package private for accessing from Option class
     List<String> names;
@@ -27,9 +27,9 @@ public class OptionBuilder<T> {
             throw new IllegalArgumentException("No option names given");
 
         for (String name : names) {
-            if (name.matches(Option.SHORT_OPTION_REGEX))
+            if (name.matches(BaseOption.SHORT_OPTION_REGEX))
                 shortNames.add(name);
-            else if (name.matches(Option.LONG_OPTION_REGEX))
+            else if (name.matches(BaseOption.LONG_OPTION_REGEX))
                 longNames.add(name);
             else
                 throw new IllegalArgumentException("Invalid option name: " + name);
@@ -42,25 +42,28 @@ public class OptionBuilder<T> {
         return this;
     }
 
-    public OptionBuilder<T> nargs(int minArgs, int maxArgs) {
+    public MultiOptionBuilder<T> nargs(int minArgs, int maxArgs) {
         if (minArgs < 0 || maxArgs < 0 || minArgs > maxArgs)
             throw new IllegalArgumentException("Invalid options number quantifier: {" + minArgs + " ," + maxArgs + "}");
         this.minArgs = minArgs;
         this.maxArgs = maxArgs;
-        return this;
+        return new MultiOptionBuilder<>(this);
     }
 
-    public OptionBuilder<T> nargs(int n) {
+    public MultiOptionBuilder<T> nargs(int n) {
         return nargs(n, n);
     }
 
-    public OptionBuilder<T> nargs(String wildcard) {
-        if (wildcard.equals("+")) {
-            nargs(1, Integer.MAX_VALUE);
-        } else if (wildcard.equals("?")) {
-            nargs(0, 1);
+    public MultiOptionBuilder<T> nargs(String wildcard) {
+        switch (wildcard) {
+            case "+":
+                return nargs(1, Integer.MAX_VALUE);
+            case "*":
+                return nargs(0, Integer.MAX_VALUE);
+            case "?":
+                return nargs(0, 1);
         }
-        return this;
+        throw new IllegalArgumentException("Unknown nargs wildcard " + wildcard);
     }
 
     public OptionBuilder<T> defaultValue(T value) {
@@ -73,8 +76,8 @@ public class OptionBuilder<T> {
         return this;
     }
 
-    public OptionBuilder<T> required(boolean isRequired) {
-        this.isRequired = isRequired;
+    public OptionBuilder<T> required() {
+        this.isRequired = true;
         return this;
     }
 

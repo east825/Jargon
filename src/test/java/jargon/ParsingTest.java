@@ -10,7 +10,6 @@ import java.util.List;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 /**
@@ -20,7 +19,7 @@ import static org.junit.Assert.assertThat;
  */
 public class ParsingTest {
     private OptionParser parser;
-    private Option<Boolean> verboseMode;
+    private Flag verboseMode;
     private Option<String> fileName;
     private Option<Integer> size;
 
@@ -34,7 +33,7 @@ public class ParsingTest {
         parser.addOption(verboseMode);
         fileName = Options.newStringOption("-f", "--file").defaultValue("output.txt").build();
         parser.addOption(fileName);
-        size = Options.newInteger("-s", "--size").build();
+        size = Options.newIntegerOption("-s", "--size").build();
         parser.addOption(size);
     }
 
@@ -48,7 +47,7 @@ public class ParsingTest {
         assertThat(rest, equalTo(Arrays.asList("foo", "bar")));
         assertThat(fileName.getValue(), equalTo("somefile"));
         assertThat(size.getValue(), equalTo(100));
-        assertThat(verboseMode.wasGiven(), is(true));
+        assertThat(verboseMode.isSet(), is(true));
     }
 
     @Test
@@ -57,7 +56,7 @@ public class ParsingTest {
         assertThat(rest, equalTo(Arrays.asList("foo", "bar")));
         assertThat(fileName.getValue(), equalTo("somefile"));
         assertThat(size.getValue(), equalTo(100));
-        assertThat(verboseMode.wasGiven(), is(false));
+        assertThat(verboseMode.isSet(), is(false));
     }
 
     @Test
@@ -66,7 +65,7 @@ public class ParsingTest {
         assertThat(rest, equalTo(Arrays.asList("foo", "bar")));
         assertThat(fileName.getValue(), equalTo("somefile"));
         assertThat(size.getValue(), equalTo(100));
-        assertThat(verboseMode.wasGiven(), is(true));
+        assertThat(verboseMode.isSet(), is(true));
     }
 
     @Test
