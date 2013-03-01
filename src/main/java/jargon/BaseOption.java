@@ -41,21 +41,26 @@ public abstract class BaseOption<T> {
     }
 
     String getFormat() {
-        StringBuilder b = new StringBuilder(getName());
-        int maxPrintedArgs = 3;
-        b.append(" ");
-        for (int i = 1; i <= Math.min(minArgs, maxPrintedArgs); i++) {
-            b.append("arg").append(i).append(' ');
+        StringBuilder b = new StringBuilder(getFirstShortName());
+        for (int i = 0; i < minArgs; i++) {
+            b.append(" ").append(getMetavar());
         }
-        if (minArgs > maxPrintedArgs)
-            b.append(" ... arg").append(minArgs).append(" ");
-
-        if (maxArgs - minArgs > 0) {
-            b.append("[").append(maxArgs - minArgs > 1 ? " ... " : "");
-            b.append("arg").append(maxArgs).append("]");
-        } else if (maxArgs - minArgs > 1)
-            b.append("[ ... arg").append(maxArgs).append("]");
-
+        if (maxArgs == Integer.MAX_VALUE) {
+            String placeholder = " [" + getMetavar() + " ...]";
+            // for nargs='*': [N [N ...]]
+            if (minArgs == 0)
+                b.append(" [").append(getMetavar()).append(placeholder).append("]");
+            else
+                b.append(placeholder);
+        } else {
+            // for nargs=(2, 5): N N [N [N [N]]]
+            for (int i = 0; i < maxArgs - minArgs; i++) {
+                b.append(" [").append(getMetavar());
+            }
+            for (int i = 0; i < maxArgs - minArgs; i++) {
+                b.append("]");
+            }
+        }
         if (!isRequired) {
             b.insert(0, "[").append("]");
         }
@@ -63,7 +68,7 @@ public abstract class BaseOption<T> {
     }
 
     String buildHelpMessage() {
-        StringBuilder b = new StringBuilder(getName());
+        StringBuilder b = new StringBuilder(getFirstShortName());
         if (shortNames.size() + longNames.size() > 1) {
             b.append(" (also ");
             for (String name : shortNames) {
@@ -81,10 +86,22 @@ public abstract class BaseOption<T> {
         return b.toString();
     }
 
+    private String getFirstShortName() {
+        return !shortNames.isEmpty() ? shortNames.get(0) : longNames.get(0);
+    }
+
+    private String getFirstLongName() {
+        return !longNames.isEmpty() ? longNames.get(0) : shortNames.get(0);
+    }
+
+    private String getMetavar() {
+        String name = getFirstLongName();
+        name = name.replaceFirst("-+", "");
+        return name.toUpperCase();
+    }
+
     public String getName() {
-        if (!longNames.isEmpty())
-            return longNames.get(0);
-        return shortNames.get(0);
+        return getFirstLongName();
     }
 
     public List<String> getNames() {
