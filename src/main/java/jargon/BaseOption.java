@@ -2,6 +2,7 @@ package jargon;
 
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -34,6 +35,36 @@ public abstract class BaseOption<T> {
         helpMessage = builder.helpMessage;
         isRequired = builder.isRequired;
         defaultValue = builder.defaultValue;
+    }
+
+    public List<String> getShortNames() {
+        return Collections.unmodifiableList(shortNames);
+    }
+
+    public List<String> getLongNames() {
+        return Collections.unmodifiableList(longNames);
+    }
+
+    public List<String> getNames() {
+        ArrayList<String> allNames = new ArrayList<>(longNames);
+        allNames.addAll(shortNames);
+        return allNames;
+    }
+
+    public int getMinArgs() {
+        return minArgs;
+    }
+
+    public int getMaxArgs() {
+        return maxArgs;
+    }
+
+    public String getHelpMessage() {
+        return helpMessage;
+    }
+
+    public int getCount() {
+        return count;
     }
 
     void setParser(OptionParser parser) {
@@ -104,12 +135,6 @@ public abstract class BaseOption<T> {
         return getFirstLongName();
     }
 
-    public List<String> getNames() {
-        ArrayList<String> allNames = new ArrayList<>(longNames);
-        allNames.addAll(shortNames);
-        return allNames;
-    }
-
     public T getDefaultValue() {
         return defaultValue;
     }
@@ -172,10 +197,6 @@ public abstract class BaseOption<T> {
 
     protected abstract void storeValue(T value);
     public abstract Object getValue();
-
-    public int getCount() {
-        return count;
-    }
 
     @Override
     public String toString() {
