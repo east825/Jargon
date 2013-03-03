@@ -12,8 +12,9 @@ public final class MultiOptionBuilder<T> {
         this.builder = b;
     }
 
-    public OptionBuilder<T> help(String helpMessage) {
-        return builder.help(helpMessage);
+    public MultiOptionBuilder<T> help(String helpMessage) {
+        builder.help(helpMessage);
+        return this;
     }
 
     public MultiOptionBuilder<T> defaultValue(T value) {

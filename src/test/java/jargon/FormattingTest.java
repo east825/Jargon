@@ -1,5 +1,6 @@
 package jargon;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -11,42 +12,71 @@ import static org.junit.Assert.assertThat;
  * Time: 5:51 PM
  */
 public class FormattingTest {
+    private HelpFormatter formatter;
+    private OptionParser parser;
+
+    @Before
+    public void setUpParserAndFormatter() {
+        parser = OptionParser.newInstance("prog").printHelp(false).help("Sample program").build();
+        formatter = new HelpFormatter(parser);
+    }
+
     @Test
     public void testFlagFormat() {
         Flag flag = Options.newFlagOption("-v", "--verbose").build();
-        assertThat(flag.getFormat(), equalTo("[-v]"));
+        parser.addOption(flag);
+        Flag requiredFlag = Options.newFlagOption("-e", "--extended").required().build();
+        parser.addOption(requiredFlag);
 
-        Flag requiredFlag = Options.newFlagOption("-v", "--verbose").required().build();
-        assertThat(requiredFlag.getFormat(), equalTo("-v"));
+        assertThat(formatter.formatProgramUsage(), equalTo("prog: [-v] -e"));
     }
 
     @Test
     public void testOptionFormat() {
         Option<String> shortNameOnlyOption = Options.newStringOption("-f").build();
-        assertThat(shortNameOnlyOption.getFormat(), equalTo("[-f F]"));
-
-        Option<String> shortLongNameOption = Options.newStringOption("-f", "--file").build();
-        assertThat(shortLongNameOption.getFormat(), equalTo("[-f FILE]"));
-
-        Option<String> requiredOption = Options.newStringOption("-f", "--file").required().build();
-        assertThat(requiredOption.getFormat(), equalTo("-f FILE"));
+        parser.addOption(shortNameOnlyOption);
+        Option<String> shortLongNameOption = Options.newStringOption("-r", "--revision").build();
+        parser.addOption(shortLongNameOption);
+        Option<String> requiredOption = Options.newStringOption("-p", "--prompt").required().build();
+        parser.addOption(requiredOption);
+        assertThat(formatter.formatProgramUsage(), equalTo("prog: [-f F] [-r REVISION] -p PROMPT"));
     }
 
     @Test
     public void testMultiOption() {
-        MultiOption<String> maybeOption = Options.newStringOption("-f").nargs("?").build();
-        assertThat(maybeOption.getFormat(), equalTo("[-f [F]]"));
+        MultiOption<String> maybeOption = Options.newStringOption("-a").nargs("?").build();
+        parser.addOption(maybeOption);
+        MultiOption<String> starOption = Options.newStringOption("-b").nargs("*").build();
+        parser.addOption(starOption);
+        MultiOption<String> plusOption = Options.newStringOption("-c").nargs("+").build();
+        parser.addOption(plusOption);
+        MultiOption<String> exactNargsOption = Options.newStringOption("-d").nargs(3).build();
+        parser.addOption(exactNargsOption);
+        MultiOption<String> floatingNargsOption = Options.newStringOption("-e").nargs(3, 5).build();
+        parser.addOption(floatingNargsOption);
+        assertThat(formatter.formatProgramUsage(), equalTo(
+                "prog: [-a [A]] [-b [B [B ...]]] [-c C [C ...]] [-d D D D] [-e E E E [E [E]]]"
+        ));
+    }
 
-        MultiOption<String> starOption = Options.newStringOption("-f").nargs("*").build();
-        assertThat(starOption.getFormat(), equalTo("[-f [F [F ...]]]"));
-
-        MultiOption<String> plusOption = Options.newStringOption("-f").nargs("+").build();
-        assertThat(plusOption.getFormat(), equalTo("[-f F [F ...]]"));
-
-        MultiOption<String> exactNargsOption = Options.newStringOption("-f").nargs(3).build();
-        assertThat(exactNargsOption.getFormat(), equalTo("[-f F F F]"));
-
-        MultiOption<String> threeToFiveOption = Options.newStringOption("-f").nargs(3, 5).build();
-        assertThat(threeToFiveOption.getFormat(), equalTo("[-f F F F [F [F]]]"));
+    @Test
+    public void testHelpMessage() {
+        // taken from mercurial help
+        Option<Integer> revision = Options.newIntegerOption("-r", "--rev").help("change made by revision").build();
+        parser.addOption(revision);
+        Option<String> withLongDescription = Options.newStringOption("-l", "--long").help(
+                "goooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooogle\n" +
+                "foo bar baz\t\n\nfoo bar baz"
+        ).build();
+        parser.addOption(withLongDescription);
+        assertThat(formatter.formatProgramHelp(), equalTo(
+                "prog: [-r REV] [-l LONG]\n" +
+                "\n" +
+                "--rev REV, -r REV        change made by revision\n" +
+                "--long LONG, -l LONG     \n" +
+                "                         goooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooogle \n" +
+                "                         foo bar baz foo bar baz\n" +
+                "Sample program"
+        ));
     }
 }

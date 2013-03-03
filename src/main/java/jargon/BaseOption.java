@@ -71,64 +71,12 @@ public abstract class BaseOption<T> {
         this.parser = parser;
     }
 
-    String getFormat() {
-        StringBuilder b = new StringBuilder(getFirstShortName());
-        for (int i = 0; i < minArgs; i++) {
-            b.append(" ").append(getMetavar());
-        }
-        if (maxArgs == Integer.MAX_VALUE) {
-            String placeholder = " [" + getMetavar() + " ...]";
-            // for nargs='*': [N [N ...]]
-            if (minArgs == 0)
-                b.append(" [").append(getMetavar()).append(placeholder).append("]");
-            else
-                b.append(placeholder);
-        } else {
-            // for nargs=(2, 5): N N [N [N [N]]]
-            for (int i = 0; i < maxArgs - minArgs; i++) {
-                b.append(" [").append(getMetavar());
-            }
-            for (int i = 0; i < maxArgs - minArgs; i++) {
-                b.append("]");
-            }
-        }
-        if (!isRequired) {
-            b.insert(0, "[").append("]");
-        }
-        return b.toString();
-    }
-
-    String buildHelpMessage() {
-        StringBuilder b = new StringBuilder(getFirstShortName());
-        if (shortNames.size() + longNames.size() > 1) {
-            b.append(" (also ");
-            for (String name : shortNames) {
-                if (!name.equals(getName()))
-                    b.append(name).append(" ");
-            }
-            for (String name : longNames) {
-                if (!name.equals(getName()))
-                    b.append(" ").append(name);
-            }
-            b.insert(b.length() - 1, ")");
-        }
-        if (helpMessage != null && !helpMessage.isEmpty())
-            b.append("\t").append(helpMessage);
-        return b.toString();
-    }
-
     private String getFirstShortName() {
         return !shortNames.isEmpty() ? shortNames.get(0) : longNames.get(0);
     }
 
     private String getFirstLongName() {
         return !longNames.isEmpty() ? longNames.get(0) : shortNames.get(0);
-    }
-
-    private String getMetavar() {
-        String name = getFirstLongName();
-        name = name.replaceFirst("-+", "");
-        return name.toUpperCase();
     }
 
     public String getName() {

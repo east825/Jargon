@@ -18,6 +18,7 @@ public class OptionParser {
     // set in parse method
     private boolean parsed = false;
     private Flag helpOption;
+    private HelpFormatter formatter = new HelpFormatter(this);
 
     public static class ParserBuilder {
         private String programName;
@@ -84,6 +85,18 @@ public class OptionParser {
         return option;
     }
 
+    public List<BaseOption<?>> getOptions() {
+        return Collections.unmodifiableList(options);
+    }
+
+    public String getProgramName() {
+        return programName;
+    }
+
+    public String getHelpMessage() {
+        return helpMessage;
+    }
+
     public boolean isParsed() {
         return parsed;
     }
@@ -100,24 +113,8 @@ public class OptionParser {
         return arg.startsWith("--");
     }
 
-    private String buildHelpMessage() {
-        StringBuilder b = new StringBuilder(programName);
-        for (BaseOption<?> o: options) {
-            b.append(" ");
-            b.append(o.getFormat());
-        }
-        b.append("\n\n");
-        for (BaseOption<?> o: options) {
-            b.append(o.buildHelpMessage());
-            b.append("\n");
-        }
-        if (helpMessage != null && !helpMessage.isEmpty())
-            b.append("\n").append(helpMessage);
-        return b.toString();
-    }
-
     private void printHelpAndExit() {
-        System.err.println(buildHelpMessage());
+        System.err.println(formatter.formatProgramHelp());
         System.exit(2);
     }
 
@@ -163,6 +160,7 @@ public class OptionParser {
         } catch (OptionParserException e) {
             if (exitOnError) {
                 System.err.println(e.getMessage());
+                System.err.println(formatter.formatProgramUsage());
                 System.exit(1);
             }
             throw e;
