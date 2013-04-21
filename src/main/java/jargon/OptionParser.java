@@ -13,8 +13,8 @@ public class OptionParser {
     private String helpMessage;
     private String programName;
     private boolean exitOnError;
-    private List<Option<?>> options = new LinkedList<>();
-    private Map<String, Option<?>> optionRegistry = new HashMap<>();
+    private List<Option<?>> options = new LinkedList<Option<?>>();
+    private Map<String, Option<?>> optionRegistry = new HashMap<String, Option<?>>();
     // set in parse method
     private boolean parsed = false;
 
@@ -119,7 +119,7 @@ public class OptionParser {
 
     public List<String> parse(String... args) throws OptionParserException {
         parsed = true;
-        ArrayList<String> positionalArgs = new ArrayList<>();
+        ArrayList<String> positionalArgs = new ArrayList<String>();
         List<String> argsList = Arrays.asList(args);
         try {
             for (int i = 0; i < argsList.size(); /* empty */) {
