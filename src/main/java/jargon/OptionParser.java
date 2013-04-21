@@ -120,7 +120,7 @@ public class OptionParser {
 
     public List<String> parse(String... args) {
         parsed = true;
-        ArrayList<String> positionalArgs = new ArrayList<>();
+        ArrayList<String> positionalArgs = new ArrayList<String>();
         List<String> argsList = Arrays.asList(args);
         BaseOption<?> option;
         try {

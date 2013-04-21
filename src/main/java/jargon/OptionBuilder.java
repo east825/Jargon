@@ -14,8 +14,8 @@ public final class OptionBuilder<T> {
 
     // Next fields are package private for accessing from Option class
     List<String> names;
-    List<String> shortNames = new ArrayList<>();
-    List<String> longNames = new ArrayList<>();
+    List<String> shortNames = new ArrayList<String>();
+    List<String> longNames = new ArrayList<String>();
     String helpMessage;
     boolean isRequired = false;
     int minArgs = 1, maxArgs = 1;
@@ -84,6 +84,6 @@ public final class OptionBuilder<T> {
     public Option<T> build() {
         if (converter == null)
             throw new IllegalStateException("Converter is required");
-        return new Option<>(this);
+        return new Option<T>(this);
     }
 }
