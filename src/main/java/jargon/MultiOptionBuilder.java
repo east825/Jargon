@@ -33,6 +33,6 @@ public final class MultiOptionBuilder<T> {
     }
 
     public MultiOption<T> build() {
-        return new MultiOption<>(builder);
+        return new MultiOption<T>(builder);
     }
 }

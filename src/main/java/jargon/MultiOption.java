@@ -10,7 +10,7 @@ import java.util.List;
  * Time: 11:54 PM
  */
 public class MultiOption<T> extends BaseOption<T> {
-    private List<T> values = new ArrayList<>();
+    private List<T> values = new ArrayList<T>();
 
     public MultiOption(OptionBuilder<T> builder) {
         super(builder);

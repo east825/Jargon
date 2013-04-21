@@ -15,7 +15,7 @@ public final class FlagOptionBuilder {
     private final OptionBuilder<Boolean> builder;
 
     public FlagOptionBuilder(String... names) {
-        builder = new OptionBuilder<>(names);
+        builder = new OptionBuilder<Boolean>(names);
         builder.converter = STUB_CONVERTER;
         builder.maxArgs = builder.minArgs = 0;
     }

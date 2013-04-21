@@ -46,7 +46,7 @@ public abstract class BaseOption<T> {
     }
 
     public List<String> getNames() {
-        ArrayList<String> allNames = new ArrayList<>(longNames);
+        ArrayList<String> allNames = new ArrayList<String>(longNames);
         allNames.addAll(shortNames);
         return allNames;
     }

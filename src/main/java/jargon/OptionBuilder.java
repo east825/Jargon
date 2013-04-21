@@ -47,7 +47,7 @@ public final class OptionBuilder<T> {
             throw new IllegalArgumentException("Invalid options number quantifier: {" + minArgs + " ," + maxArgs + "}");
         this.minArgs = minArgs;
         this.maxArgs = maxArgs;
-        return new MultiOptionBuilder<>(this);
+        return new MultiOptionBuilder<T>(this);
     }
 
     public MultiOptionBuilder<T> nargs(int n) {
@@ -55,13 +55,12 @@ public final class OptionBuilder<T> {
     }
 
     public MultiOptionBuilder<T> nargs(String wildcard) {
-        switch (wildcard) {
-            case "+":
-                return nargs(1, Integer.MAX_VALUE);
-            case "*":
-                return nargs(0, Integer.MAX_VALUE);
-            case "?":
-                return nargs(0, 1);
+        if (wildcard.equals("+")) {
+            return nargs(1, Integer.MAX_VALUE);
+        } else if (wildcard.equals("*")) {
+            return nargs(0, Integer.MAX_VALUE);
+        } else if (wildcard.equals("?")) {
+            return nargs(0, 1);
         }
         throw new IllegalArgumentException("Unknown nargs wildcard " + wildcard);
     }

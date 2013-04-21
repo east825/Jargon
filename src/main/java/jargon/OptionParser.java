@@ -13,8 +13,8 @@ public class OptionParser {
     private String helpMessage;
     private String programName;
     private boolean exitOnError;
-    private List<BaseOption<?>> options = new LinkedList<>();
-    private Map<String, BaseOption<?>> optionRegistry = new HashMap<>();
+    private List<BaseOption<?>> options = new LinkedList<BaseOption<?>>();
+    private Map<String, BaseOption<?>> optionRegistry = new HashMap<String, BaseOption<?>>();
     // set in parse method
     private boolean parsed = false;
     private Flag helpOption;
