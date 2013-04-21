@@ -29,7 +29,7 @@ public class Option<T> {
     private OptionParser parser = null;
 
     // Parsed values
-    private List<T> values = new LinkedList<>();
+    private List<T> values = new LinkedList<T>();
 
     public Option(OptionBuilder<T> builder) {
         shortNames = builder.shortNames;
@@ -53,7 +53,7 @@ public class Option<T> {
     }
 
     public List<String> getNames() {
-        ArrayList<String> allNames = new ArrayList<>(longNames);
+        ArrayList<String> allNames = new ArrayList<String>(longNames);
         allNames.addAll(shortNames);
         return allNames;
     }
